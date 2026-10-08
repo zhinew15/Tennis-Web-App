@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIxNTgxMTA0NDI0MzE4NTIzNDI0NCIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzU4MmIwMjNjNmVlY2Q3ZDdfaW5kZXguaHRtbC01NzIifSwiZXhwIjoxNzkxNDIzMzk3LCJpYXQiOjE3OTE0MTk3OTcsImFsZyI6IlJTMjU2In0.lM0N1UA-8wDOoUHWLpVY5gMUxwSuiINA9W0N0H1SnGQxKHQL6DTNWeDi_2O0MxL0WLYg5-kHqva55c9CRlRHtgdMrADMbjy7Oumq0BElb7s93qBHLQIxGcYh4aVYnC5dcvMdGroGlbSCwBe8F4OFFOc4zcEFe93cdqNBw1amo86UJN_dNfuYXQYRCmcXkA6sE9EPoisJb6PwcY0pedTWcxt4FLSgn7ziVEyOZKEVUy__0Shq0kzSS7O4107cEM5WXB9bOdENcAzRoc-0LUf9MhrnPfNRa3Vb62jLBSmI3WAf4llRaFDoxeUIkMB2kBCLub2Yq96etzXfWt3eMFYXdw","c_582b023c6eecd7d7_index.html-572")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.j=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.i="";var l=0,t=null,r=null,q=[],F=new TextEncoder,G=new TextDecoder;
+c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*16|0;return(f===
+"x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;(g=t)==null||g.postMessage(a)}};
+Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Apex Tennis">
+  <meta name="theme-color" content="#000000">
+  <title>Apex Tennis • iOS Training Program</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest" crossorigin="anonymous"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            iosBg: '#000000',
+            iosCard: '#1c1c1e',
+            iosCardSecondary: '#2c2c2e',
+            iosSeparator: '#38383a',
+            iosLabelSecondary: '#8e8e93',
+            iosTennisGreen: '#a3e635',
+            iosBlue: '#0a84ff',
+            iosOrange: '#ff9f0a',
+            iosRed: '#ff453a',
+            iosPurple: '#bf5af2'
+          },
+          fontFamily: {
+            sans: [
+              '-apple-system',
+              'BlinkMacSystemFont',
+              '"SF Pro Display"',
+              '"SF Pro Text"',
+              'system-ui',
+              'sans-serif'
+            ]
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Prevent rubber banding on background while retaining smooth momentum inside scrollable areas */
+    body {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .safe-top {
+      padding-top: max(env(safe-area-inset-top), 12px);
+    }
+    .safe-bottom {
+      padding-bottom: max(env(safe-area-inset-bottom), 16px);
+    }
+    /* iOS smooth momentum scrolling */
+    .ios-scroll {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+    }
+    /* Hide scrollbars */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Spring button feedback */
+    .ios-tap:active {
+      transform: scale(0.96);
+      transition: transform 0.12s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    /* Glass blur effect */
+    .ios-glass {
+      background-color: rgba(28, 28, 30, 0.82);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+    }
+    .ios-glass-bar {
+      background-color: rgba(18, 18, 20, 0.86);
+      backdrop-filter: blur(28px) saturate(190%);
+      -webkit-backdrop-filter: blur(28px) saturate(190%);
+    }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.bottom-0{bottom:0px}.left-0{left:0px}.left-3{left:0.75rem}.right-0{right:0px}.top-3{top:0.75rem}.z-30{z-index:30}.z-40{z-index:40}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.my-1{margin-top:0.25rem;margin-bottom:0.25rem}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mt-1{margin-top:0.25rem}.mt-0\.5{margin-top:0.125rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-1{height:0.25rem}.h-12{height:3rem}.h-16{height:4rem}.h-3\.5{height:0.875rem}.h-36{height:9rem}.h-4{height:1rem}.h-44{height:11rem}.h-5{height:1.25rem}.h-8{height:2rem}.h-full{height:100%}.h-1\.5{height:0.375rem}.max-h-\[85vh\]{max-height:85vh}.w-10{width:2.5rem}.w-12{width:3rem}.w-16{width:4rem}.w-3\.5{width:0.875rem}.w-36{width:9rem}.w-4{width:1rem}.w-44{width:11rem}.w-5{width:1.25rem}.w-8{width:2rem}.w-full{width:100%}.w-1\.5{width:0.375rem}.max-w-md{max-width:28rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.-rotate-90{--tw-rotate:-90deg;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.grid-cols-5{grid-template-columns:repeat(5, minmax(0, 1fr))}.grid-cols-7{grid-template-columns:repeat(7, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-start{align-items:flex-start}.items-center{align-items:center}.items-baseline{align-items:baseline}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-2\.5{gap:0.625rem}.space-y-1 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.25rem * var(--tw-space-y-reverse))}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-3\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.875rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.875rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.divide-iosSeparator\/40 > :not([hidden]) ~ :not([hidden]){border-color:rgb(56 56 58 / 0.4)}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded-md{border-radius:0.375rem}.rounded-t-3xl{border-top-left-radius:1.5rem;border-top-right-radius:1.5rem}.border{border-width:1px}.border-4{border-width:4px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-iosCardSecondary{--tw-border-opacity:1;border-color:rgb(44 44 46 / var(--tw-border-opacity, 1))}.border-iosSeparator{--tw-border-opacity:1;border-color:rgb(56 56 58 / var(--tw-border-opacity, 1))}.border-iosSeparator\/40{border-color:rgb(56 56 58 / 0.4)}.border-iosSeparator\/50{border-color:rgb(56 56 58 / 0.5)}.border-iosSeparator\/60{border-color:rgb(56 56 58 / 0.6)}.border-iosTennisGreen\/30{border-color:rgb(163 230 53 / 0.3)}.border-iosOrange\/30{border-color:rgb(255 159 10 / 0.3)}.border-iosBlue\/30{border-color:rgb(10 132 255 / 0.3)}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.bg-black\/60{background-color:rgb(0 0 0 / 0.6)}.bg-black\/70{background-color:rgb(0 0 0 / 0.7)}.bg-iosBg{--tw-bg-opacity:1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.bg-iosBlue{--tw-bg-opacity:1;background-color:rgb(10 132 255 / var(--tw-bg-opacity, 1))}.bg-iosBlue\/20{background-color:rgb(10 132 255 / 0.2)}.bg-iosCard{--tw-bg-opacity:1;background-color:rgb(28 28 30 / var(--tw-bg-opacity, 1))}.bg-iosCardSecondary{--tw-bg-opacity:1;background-color:rgb(44 44 46 / var(--tw-bg-opacity, 1))}.bg-iosCardSecondary\/70{background-color:rgb(44 44 46 / 0.7)}.bg-iosCardSecondary\/80{background-color:rgb(44 44 46 / 0.8)}.bg-iosOrange\/20{background-color:rgb(255 159 10 / 0.2)}.bg-iosRed\/20{background-color:rgb(255 69 58 / 0.2)}.bg-iosSeparator{--tw-bg-opacity:1;background-color:rgb(56 56 58 / var(--tw-bg-opacity, 1))}.bg-iosTennisGreen{--tw-bg-opacity:1;background-color:rgb(163 230 53 / var(--tw-bg-opacity, 1))}.bg-iosTennisGreen\/10{background-color:rgb(163 230 53 / 0.1)}.bg-iosTennisGreen\/15{background-color:rgb(163 230 53 / 0.15)}.bg-iosTennisGreen\/20{background-color:rgb(163 230 53 / 0.2)}.bg-transparent{background-color:transparent}.bg-iosBg\/80{background-color:rgb(0 0 0 / 0.8)}.bg-iosOrange\/15{background-color:rgb(255 159 10 / 0.15)}.bg-iosBlue\/15{background-color:rgb(10 132 255 / 0.15)}.fill-black{fill:#000}.fill-white{fill:#fff}.stroke-\[3\]{stroke-width:3}.p-1{padding:0.25rem}.p-2{padding:0.5rem}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.p-3\.5{padding:0.875rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-2\.5{padding-bottom:0.625rem}.pb-24{padding-bottom:6rem}.pl-9{padding-left:2.25rem}.pr-4{padding-right:1rem}.pt-2{padding-top:0.5rem}.pb-3{padding-bottom:0.75rem}.pl-3{padding-left:0.75rem}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-sans{font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif}.text-2xl{font-size:1.5rem;line-height:2rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-5xl{font-size:3rem;line-height:1}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.text-\[9px\]{font-size:9px}.font-black{font-weight:900}.font-bold{font-weight:700}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.leading-snug{line-height:1.375}.tracking-tight{letter-spacing:-0.025em}.tracking-tighter{letter-spacing:-0.05em}.tracking-wide{letter-spacing:0.025em}.tracking-wider{letter-spacing:0.05em}.tracking-widest{letter-spacing:0.1em}.text-black{--tw-text-opacity:1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.text-iosBlue{--tw-text-opacity:1;color:rgb(10 132 255 / var(--tw-text-opacity, 1))}.text-iosCardSecondary{--tw-text-opacity:1;color:rgb(44 44 46 / var(--tw-text-opacity, 1))}.text-iosLabelSecondary{--tw-text-opacity:1;color:rgb(142 142 147 / var(--tw-text-opacity, 1))}.text-iosOrange{--tw-text-opacity:1;color:rgb(255 159 10 / var(--tw-text-opacity, 1))}.text-iosRed{--tw-text-opacity:1;color:rgb(255 69 58 / var(--tw-text-opacity, 1))}.text-iosTennisGreen{--tw-text-opacity:1;color:rgb(163 230 53 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-transparent{color:transparent}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.placeholder-iosLabelSecondary::placeholder{--tw-placeholder-opacity:1;color:rgb(142 142 147 / var(--tw-placeholder-opacity, 1))}.accent-iosTennisGreen{accent-color:#a3e635}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-iosBlue\/20{--tw-shadow-color:rgb(10 132 255 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-iosTennisGreen\/20{--tw-shadow-color:rgb(163 230 53 / 0.2);--tw-shadow:var(--tw-shadow-colored)}.shadow-iosTennisGreen\/30{--tw-shadow-color:rgb(163 230 53 / 0.3);--tw-shadow:var(--tw-shadow-colored)}.outline-none{outline:2px solid transparent;outline-offset:2px}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-500{transition-duration:500ms}.ease-out{transition-timing-function:cubic-bezier(0, 0, 0.2, 1)}.selection\:bg-iosTennisGreen *::selection{--tw-bg-opacity:1;background-color:rgb(163 230 53 / var(--tw-bg-opacity, 1))}.selection\:text-black *::selection{--tw-text-opacity:1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.selection\:bg-iosTennisGreen::selection{--tw-bg-opacity:1;background-color:rgb(163 230 53 / var(--tw-bg-opacity, 1))}.selection\:text-black::selection{--tw-text-opacity:1;color:rgb(0 0 0 / var(--tw-text-opacity, 1))}.hover\:bg-iosSeparator:hover{--tw-bg-opacity:1;background-color:rgb(56 56 58 / var(--tw-bg-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:underline:hover{-webkit-text-decoration-line:underline;text-decoration-line:underline}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}.focus\:ring-1:focus{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus\:ring-iosTennisGreen:focus{--tw-ring-opacity:1;--tw-ring-color:rgb(163 230 53 / var(--tw-ring-opacity, 1))}</style></head>
+<body class="bg-black text-white h-full flex flex-col font-sans antialiased overflow-hidden selection:bg-iosTennisGreen selection:text-black">
+
+  <!-- TOP STATUS / NOTCH / DYNAMIC ISLAND HEADER -->
+  <header class="safe-top shrink-0 px-4 pb-2.5 ios-glass border-b border-iosSeparator/60 z-30 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-iosTennisGreen text-black font-black text-sm flex items-center justify-center shadow-md shadow-iosTennisGreen/30">
+        🎾
+      </div>
+      <div>
+        <h1 class="text-sm font-bold tracking-tight text-white leading-tight">Apex Tennis</h1>
+        <span class="text-[10px] text-iosTennisGreen font-medium tracking-wide">3 Court • 3 Gym Split</span>
+      </div>
+    </div>
+
+    <!-- Quick Action / Download button -->
+    <div class="flex items-center gap-2">
+      <button onclick="downloadSelfApp()" class="ios-tap flex items-center gap-1.5 px-3 py-1 rounded-full bg-iosTennisGreen/15 border border-iosTennisGreen/30 text-iosTennisGreen text-xs font-semibold">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="download" aria-hidden="true" class="lucide lucide-download w-3.5 h-3.5"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg>
+        <span>Get File</span>
+      </button>
+      <button onclick="openModal('sheet-install')" class="ios-tap w-8 h-8 rounded-full bg-iosCardSecondary flex items-center justify-center text-iosLabelSecondary hover:text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="share" aria-hidden="true" class="lucide lucide-share w-4 h-4"><path d="M12 2v13"></path><path d="m16 6-4-4-4 4"></path><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN SCROLLABLE VIEWPORT FOR TABS -->
+  <main id="mainScrollView" class="flex-1 overflow-y-auto ios-scroll no-scrollbar pb-24">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: TODAY / SCHEDULE VIEW               -->
+    <!-- ========================================== -->
+    <section id="tab-today" class="p-4 space-y-4">
+      
+      <!-- Apple Health / Fitness Rings Card -->
+      <div class="bg-iosCard border border-iosSeparator/50 rounded-2xl p-4 shadow-lg flex items-center justify-between">
+        <div class="space-y-1">
+          <span class="text-[11px] uppercase tracking-wider font-semibold text-iosLabelSecondary">Weekly Consistency</span>
+          <div class="flex items-baseline gap-1.5">
+            <span id="healthRingPercent" class="text-2xl font-black tracking-tight text-white">0%</span>
+            <span id="healthRingFraction" class="text-xs text-iosLabelSecondary">0/7 Sessions</span>
+          </div>
+          <p id="healthRingStatus" class="text-xs text-iosTennisGreen font-medium">5 to hit weekly goal</p>
+        </div>
+
+        <!-- Activity Ring Gauge -->
+        <div class="relative w-16 h-16 flex items-center justify-center">
+          <svg class="w-16 h-16 transform -rotate-90" viewBox="0 0 36 36">
+            <path class="text-iosCardSecondary" stroke-width="4" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+            <path id="ringSvgPath" class="text-iosTennisGreen transition-all duration-500 ease-out" stroke-dasharray="0, 100" stroke-width="4" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="zap" aria-hidden="true" class="lucide lucide-zap absolute w-5 h-5 text-iosTennisGreen"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"></path></svg>
+        </div>
+      </div>
+
+      <!-- iOS Native Segmented Day Control (Mon -> Sun) -->
+      <div class="space-y-1.5">
+        <div class="flex justify-between items-center px-1">
+          <span class="text-xs font-semibold uppercase tracking-wider text-iosLabelSecondary">Weekly Microcycle</span>
+          <span id="currentDateBadge" class="text-[11px] text-iosLabelSecondary font-mono">Today</span>
+        </div>
+        <div class="grid grid-cols-7 gap-1 bg-iosCardSecondary/70 p-1 rounded-xl border border-iosSeparator/40 text-center" id="daySegmentControl">
+          <button onclick="selectDay('mon')" class="ios-tap py-1.5 rounded-lg flex flex-col items-center justify-center transition bg-iosCard text-white shadow-md">
+            <span class="text-[11px] font-bold">Mon</span>
+            <span class="w-1.5 h-1.5 rounded-full mt-1 bg-transparent"></span>
+          </button>
+        
+          <button onclick="selectDay('tue')" class="ios-tap py-1.5 rounded-lg flex flex-col items-center justify-center transition text-iosLabelSecondary">
+            <span class="text-[11px] font-bold">Tue</span>
+            <span class="w-1.5 h-1.5 rounded-full mt-1 bg-transparent"></span>
+          </button>
+        
+          <button onclick="selectDay('wed')" class="ios-tap py-1.5 rounded-lg flex flex-col items-center justify-center transition text-iosLabelSecondary">
+            <span class="text-[11px] font-bold">Wed</span>
+            <span class="w-1.5 h-1.5 rounded-full mt-1 bg-transparent"></span>
+          </button>
+        
+          <button onclick="selectDay('thu')" class="ios-tap py-1.5 rounded-lg flex flex-col items-center justify-center transition text-iosLabelSecondary">
+            <span class="text-[11px] font-bold">Thu</span>
+            <span class="w-1.5 h-1.5 rounded-full mt-1 bg-transparent"></span>
+          </button>
+        
+          <button onclick="selectDay('fri')" class="ios-tap py-1.5 rounded-lg flex flex-col items-center justify-center transition text-iosLabelSecondary">
+            <span class="text-[11px] font-bold">Fri</span>
+            <span class="w-1.5 h-1.5 rounded-full mt-1 bg-transparent"></span>
+          </button>
+        
+          <button onclick="selectDay('sat')" class="ios-tap py-1.5 rounded-lg flex flex-col items-center justify-center transition text-iosLabelSecondary">
+            <span class="text-[11px] font-bold">Sat</span>
+            <span class="w-1.5 h-1.5 rounded-full mt-1 bg-transparent"></span>
+          </button>
+        
+          <button onclick="selectDay('sun')" class="ios-tap py-1.5 rounded-lg flex flex-col items-center justify-center transition text-iosLabelSecondary">
+            <span class="text-[11px] font-bold">Sun</span>
+            <span class="w-1.5 h-1.5 rounded-full mt-1 bg-transparent"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Day Workout Card -->
+      <div id="dayDetailCard" class="bg-iosCard border border-iosSeparator/60 rounded-2xl p-4 space-y-4 shadow-xl">
+        <div class="flex items-start justify-between border-b border-iosSeparator/50 pb-3">
+          <div>
+            <div class="flex items-center gap-1.5 mb-1">
+              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border bg-iosOrange/15 text-iosOrange border-iosOrange/30">
+                🎾 On-Court
+              </span>
+              <span class="text-xs text-iosLabelSecondary font-mono">• 75 min</span>
+            </div>
+            <h2 class="text-base font-bold text-white tracking-tight">On-Court: Baseline Rhythm &amp; Split-Step Agility</h2>
+          </div>
+          <button onclick="toggleDayCompleted('mon')" class="ios-tap px-3 py-1.5 rounded-full text-xs font-bold transition bg-iosCardSecondary text-iosLabelSecondary border border-iosSeparator/40">
+            Mark Done
+          </button>
+        </div>
+
+        <!-- Biomechanics focus banner -->
+        <div class="p-3 bg-iosBg rounded-xl border border-iosSeparator/40 flex items-start gap-2.5">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="target" aria-hidden="true" class="lucide lucide-target w-4 h-4 text-iosTennisGreen shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-iosTennisGreen block">Primary Skill Objective</span>
+            <p class="text-xs text-slate-300 font-medium leading-relaxed">Active split-step timing on ball contact, 2-handed backhand drive depth, and lateral recovery.</p>
+          </div>
+        </div>
+
+        <!-- Exercise Checklist -->
+        <div class="space-y-2">
+          <span class="text-[11px] uppercase font-bold tracking-wider text-iosLabelSecondary block">Exercise Checklist</span>
+          
+              <div onclick="toggleExerciseCheck('m1')" class="ios-tap bg-iosBg/80 border border-iosSeparator/40 rounded-xl p-3 flex items-start gap-3 cursor-pointer">
+                <div class="w-5 h-5 rounded-md mt-0.5 flex items-center justify-center border transition border-iosSeparator bg-iosCardSecondary text-transparent">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" aria-hidden="true" class="lucide lucide-check w-3.5 h-3.5 stroke-[3]"><path d="M20 6 9 17l-5-5"></path></svg>
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center">
+                    <h4 class="text-xs font-bold text-white ">Dynamic Shadow Swings &amp; Split Drops</h4>
+                    <span class="text-[10px] text-iosLabelSecondary font-mono">10 min</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Perform 30 continuous shadow strokes, landing softly on balls of feet.</p>
+                </div>
+              </div>
+            
+              <div onclick="toggleExerciseCheck('m2')" class="ios-tap bg-iosBg/80 border border-iosSeparator/40 rounded-xl p-3 flex items-start gap-3 cursor-pointer">
+                <div class="w-5 h-5 rounded-md mt-0.5 flex items-center justify-center border transition border-iosSeparator bg-iosCardSecondary text-transparent">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" aria-hidden="true" class="lucide lucide-check w-3.5 h-3.5 stroke-[3]"><path d="M20 6 9 17l-5-5"></path></svg>
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center">
+                    <h4 class="text-xs font-bold text-white ">Deep Crosscourt Rally Target Sets</h4>
+                    <span class="text-[10px] text-iosLabelSecondary font-mono">20 min</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Clear net 3–4 feet high; drive ball past service line.</p>
+                </div>
+              </div>
+            
+              <div onclick="toggleExerciseCheck('m3')" class="ios-tap bg-iosBg/80 border border-iosSeparator/40 rounded-xl p-3 flex items-start gap-3 cursor-pointer">
+                <div class="w-5 h-5 rounded-md mt-0.5 flex items-center justify-center border transition border-iosSeparator bg-iosCardSecondary text-transparent">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" aria-hidden="true" class="lucide lucide-check w-3.5 h-3.5 stroke-[3]"><path d="M20 6 9 17l-5-5"></path></svg>
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center">
+                    <h4 class="text-xs font-bold text-white ">Split-Step Reaction Shuffle Drill</h4>
+                    <span class="text-[10px] text-iosLabelSecondary font-mono">15 min</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Hop the millisecond partner or machine initiates stroke.</p>
+                </div>
+              </div>
+            
+              <div onclick="toggleExerciseCheck('m4')" class="ios-tap bg-iosBg/80 border border-iosSeparator/40 rounded-xl p-3 flex items-start gap-3 cursor-pointer">
+                <div class="w-5 h-5 rounded-md mt-0.5 flex items-center justify-center border transition border-iosSeparator bg-iosCardSecondary text-transparent">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" aria-hidden="true" class="lucide lucide-check w-3.5 h-3.5 stroke-[3]"><path d="M20 6 9 17l-5-5"></path></svg>
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center">
+                    <h4 class="text-xs font-bold text-white ">High-Ball 2-Handed Backhand Drives</h4>
+                    <span class="text-[10px] text-iosLabelSecondary font-mono">20 min</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Take racquet above shoulder level early; let left arm dominate push-through.</p>
+                </div>
+              </div>
+            
+              <div onclick="toggleExerciseCheck('m5')" class="ios-tap bg-iosBg/80 border border-iosSeparator/40 rounded-xl p-3 flex items-start gap-3 cursor-pointer">
+                <div class="w-5 h-5 rounded-md mt-0.5 flex items-center justify-center border transition border-iosSeparator bg-iosCardSecondary text-transparent">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="check" aria-hidden="true" class="lucide lucide-check w-3.5 h-3.5 stroke-[3]"><path d="M20 6 9 17l-5-5"></path></svg>
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center">
+                    <h4 class="text-xs font-bold text-white ">Achilles &amp; Hip Flexor Decompression</h4>
+                    <span class="text-[10px] text-iosLabelSecondary font-mono">10 min</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Decompress calves and hips after explosive stops.</p>
+                </div>
+              </div>
+            
+        </div>
+
+        <button onclick="switchTab('timer')" class="ios-tap w-full py-2.5 bg-iosCardSecondary hover:bg-iosSeparator text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="timer" aria-hidden="true" class="lucide lucide-timer w-4 h-4 text-iosTennisGreen"><line x1="10" x2="14" y1="2" y2="2"></line><line x1="12" x2="15" y1="14" y2="11"></line><circle cx="12" cy="14" r="8"></circle></svg> Launch Split-Step Timer
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: DRILLS / GYM LIBRARY                -->
+    <!-- ========================================== -->
+    <section id="tab-drills" class="hidden p-4 space-y-4">
+      <!-- Search Input iOS Style -->
+      <div class="relative">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="search" aria-hidden="true" class="lucide lucide-search w-4 h-4 text-iosLabelSecondary absolute left-3 top-3"><path d="m21 21-4.34-4.34"></path><circle cx="11" cy="11" r="8"></circle></svg>
+        <input type="text" id="drillSearch" oninput="renderDrillLibrary()" placeholder="Search footwork, 2H backhand, gym..." class="w-full bg-iosCardSecondary rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder-iosLabelSecondary focus:outline-none focus:ring-1 focus:ring-iosTennisGreen">
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="flex gap-2 overflow-x-auto no-scrollbar py-1 text-xs font-medium" id="drillCategoryRow">
+        <button onclick="setDrillFilter('all')" class="drill-cat-btn ios-tap px-3 py-1.5 rounded-full bg-iosTennisGreen text-black font-semibold shrink-0" data-cat="all">All Drills</button>
+        <button onclick="setDrillFilter('footwork')" class="drill-cat-btn ios-tap px-3 py-1.5 rounded-full bg-iosCardSecondary text-iosLabelSecondary shrink-0" data-cat="footwork">Footwork &amp; Split-Step</button>
+        <button onclick="setDrillFilter('swing')" class="drill-cat-btn ios-tap px-3 py-1.5 rounded-full bg-iosCardSecondary text-iosLabelSecondary shrink-0" data-cat="swing">Stroke Mechanics</button>
+        <button onclick="setDrillFilter('gym')" class="drill-cat-btn ios-tap px-3 py-1.5 rounded-full bg-iosCardSecondary text-iosLabelSecondary shrink-0" data-cat="gym">Gym Strength</button>
+        <button onclick="setDrillFilter('prehab')" class="drill-cat-btn ios-tap px-3 py-1.5 rounded-full bg-iosCardSecondary text-iosLabelSecondary shrink-0" data-cat="prehab">Arm Prehab &amp; Mobility</button>
+      </div>
+
+      <!-- Drills List -->
+      <div id="drillsListContainer" class="space-y-3">
+        <div onclick="inspectDrill('dl-1')" class="ios-tap bg-iosCard border border-iosSeparator/60 rounded-2xl p-4 flex items-center justify-between cursor-pointer shadow-sm">
+          <div class="space-y-1">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-iosTennisGreen">Footwork &amp; Agility</span>
+            <h3 class="text-sm font-bold text-white tracking-tight">Split-Step Reaction &amp; Deceleration Hop</h3>
+            <p class="text-xs text-iosLabelSecondary font-medium">Dynamic first-step acceleration to corner balls</p>
+          </div>
+          <div class="flex items-center gap-2 pl-3">
+            <span class="text-xs text-iosLabelSecondary font-mono">15 min</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-right" aria-hidden="true" class="lucide lucide-chevron-right w-4 h-4 text-iosLabelSecondary"><path d="m9 18 6-6-6-6"></path></svg>
+          </div>
+        </div>
+      
+        <div onclick="inspectDrill('dl-2')" class="ios-tap bg-iosCard border border-iosSeparator/60 rounded-2xl p-4 flex items-center justify-between cursor-pointer shadow-sm">
+          <div class="space-y-1">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-iosTennisGreen">Stroke Mechanics</span>
+            <h3 class="text-sm font-bold text-white tracking-tight">High-Ball 2-Handed Backhand Take-Back</h3>
+            <p class="text-xs text-iosLabelSecondary font-medium">Dominating shoulder-high topspin backhands</p>
+          </div>
+          <div class="flex items-center gap-2 pl-3">
+            <span class="text-xs text-iosLabelSecondary font-mono">20 min</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-right" aria-hidden="true" class="lucide lucide-chevron-right w-4 h-4 text-iosLabelSecondary"><path d="m9 18 6-6-6-6"></path></svg>
+          </div>
+        </div>
+      
+        <div onclick="inspectDrill('dl-3')" class="ios-tap bg-iosCard border border-iosSeparator/60 rounded-2xl p-4 flex items-center justify-between cursor-pointer shadow-sm">
+          <div class="space-y-1">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-iosTennisGreen">Stroke Mechanics</span>
+            <h3 class="text-sm font-bold text-white tracking-tight">Open-Stance Forehand Hip Coil &amp; Fire</h3>
+            <p class="text-xs text-iosLabelSecondary font-medium">Heavy topspin baseline depth under speed</p>
+          </div>
+          <div class="flex items-center gap-2 pl-3">
+            <span class="text-xs text-iosLabelSecondary font-mono">20 min</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-right" aria-hidden="true" class="lucide lucide-chevron-right w-4 h-4 text-iosLabelSecondary"><path d="m9 18 6-6-6-6"></path></svg>
+          </div>
+        </div>
+      
+        <div onclick="inspectDrill('dl-4')" class="ios-tap bg-iosCard border border-iosSeparator/60 rounded-2xl p-4 flex items-center justify-between cursor-pointer shadow-sm">
+          <div class="space-y-1">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-iosTennisGreen">Gym Strength</span>
+            <h3 class="text-sm font-bold text-white tracking-tight">Rotational Medicine Ball Wall Scoop</h3>
+            <p class="text-xs text-iosLabelSecondary font-medium">Core rotational torque for groundstrokes</p>
+          </div>
+          <div class="flex items-center gap-2 pl-3">
+            <span class="text-xs text-iosLabelSecondary font-mono">12 min</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-right" aria-hidden="true" class="lucide lucide-chevron-right w-4 h-4 text-iosLabelSecondary"><path d="m9 18 6-6-6-6"></path></svg>
+          </div>
+        </div>
+      
+        <div onclick="inspectDrill('dl-5')" class="ios-tap bg-iosCard border border-iosSeparator/60 rounded-2xl p-4 flex items-center justify-between cursor-pointer shadow-sm">
+          <div class="space-y-1">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-iosTennisGreen">Gym Strength</span>
+            <h3 class="text-sm font-bold text-white tracking-tight">Trap Bar Hex Deadlift</h3>
+            <p class="text-xs text-iosLabelSecondary font-medium">Ground reaction force and serve leg drive</p>
+          </div>
+          <div class="flex items-center gap-2 pl-3">
+            <span class="text-xs text-iosLabelSecondary font-mono">15 min</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-right" aria-hidden="true" class="lucide lucide-chevron-right w-4 h-4 text-iosLabelSecondary"><path d="m9 18 6-6-6-6"></path></svg>
+          </div>
+        </div>
+      
+        <div onclick="inspectDrill('dl-6')" class="ios-tap bg-iosCard border border-iosSeparator/60 rounded-2xl p-4 flex items-center justify-between cursor-pointer shadow-sm">
+          <div class="space-y-1">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-iosTennisGreen">Arm Prehab &amp; Mobility</span>
+            <h3 class="text-sm font-bold text-white tracking-tight">Tyler Twist with FlexBar (Anti-Tennis Elbow)</h3>
+            <p class="text-xs text-iosLabelSecondary font-medium">Extensor Carpi Radialis tendon remodeling</p>
+          </div>
+          <div class="flex items-center gap-2 pl-3">
+            <span class="text-xs text-iosLabelSecondary font-mono">8 min</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-right" aria-hidden="true" class="lucide lucide-chevron-right w-4 h-4 text-iosLabelSecondary"><path d="m9 18 6-6-6-6"></path></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: TIMERS (CADENCE & HIIT)             -->
+    <!-- ========================================== -->
+    <section id="tab-timer" class="hidden p-4 space-y-4">
+      
+      <!-- Submode Toggle: Cadence Metronome vs Interval Stopwatch -->
+      <div class="grid grid-cols-2 gap-1 bg-iosCardSecondary/80 p-1 rounded-xl text-center text-xs font-semibold">
+        <button id="timerSubBtn-cadence" onclick="switchTimerSubMode('cadence')" class="ios-tap py-2 rounded-lg bg-iosCard text-white shadow-sm">
+          Split-Step Cadence
+        </button>
+        <button id="timerSubBtn-interval" onclick="switchTimerSubMode('interval')" class="ios-tap py-2 rounded-lg text-iosLabelSecondary">
+          HIIT Rally Timer
+        </button>
+      </div>
+
+      <!-- Cadence Metronome View -->
+      <div id="subView-cadence" class="bg-iosCard border border-iosSeparator/60 rounded-2xl p-6 text-center space-y-6 shadow-xl">
+        <div>
+          <span class="text-[10px] uppercase font-bold tracking-widest text-iosTennisGreen">Reaction Hop Rhythm</span>
+          <h2 class="text-xl font-bold text-white mt-1">Split-Step Cadence Metronome</h2>
+          <p class="text-xs text-iosLabelSecondary mt-1 leading-relaxed">
+            Time your split-step landing or jump rope cycle to the audio tick. Match play averages 65–75 split-steps per intense minute.
+          </p>
+        </div>
+
+        <div class="py-4 flex justify-center items-center">
+          <div id="cadencePulseOrb" class="w-36 h-36 rounded-full border-4 border-iosCardSecondary bg-iosBg flex flex-col items-center justify-center transition-all">
+            <span id="cadenceBpmText" class="text-4xl font-black font-mono text-white">70</span>
+            <span class="text-[11px] font-semibold text-iosLabelSecondary uppercase tracking-wider">Hops / Min</span>
+          </div>
+        </div>
+
+        <!-- Slider -->
+        <div class="space-y-2">
+          <input type="range" id="cadenceSlider" min="45" max="130" value="70" oninput="adjustBPM(this.value)" class="w-full accent-iosTennisGreen cursor-pointer">
+          <div class="flex justify-between text-[11px] font-mono text-iosLabelSecondary">
+            <span>45 (Slow)</span>
+            <span>70 (Match Rally)</span>
+            <span>130 (Fast Rope)</span>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex items-center justify-center gap-3 pt-2">
+          <button id="cadencePlayBtn" onclick="toggleCadenceMetronome()" class="ios-tap flex items-center justify-center gap-2 flex-1 py-3 bg-iosTennisGreen text-black font-bold text-sm rounded-xl shadow-lg shadow-iosTennisGreen/20">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="play" aria-hidden="true" class="lucide lucide-play w-4 h-4 fill-black"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path></svg>
+            <span>Start Cadence</span>
+          </button>
+          <button onclick="toggleAudioMute()" id="audioMuteBtn" class="ios-tap w-12 h-12 rounded-xl bg-iosCardSecondary flex items-center justify-center text-iosLabelSecondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="volume-2" aria-hidden="true" class="lucide lucide-volume-2 w-5 h-5"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"></path><path d="M16 9a5 5 0 0 1 0 6"></path><path d="M19.364 18.364a9 9 0 0 0 0-12.728"></path></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- HIIT Interval View -->
+      <div id="subView-interval" class="hidden bg-iosCard border border-iosSeparator/60 rounded-2xl p-6 text-center space-y-6 shadow-xl">
+        <div>
+          <span class="text-[10px] uppercase font-bold tracking-widest text-iosBlue">Sprint &amp; Recovery Protocol</span>
+          <h2 class="text-xl font-bold text-white mt-1">Court Interval Stopwatch</h2>
+          <p class="text-xs text-iosLabelSecondary mt-1">
+            Simulate 20s maximum exertion baseline scrambles followed by 40s rest between points.
+          </p>
+        </div>
+
+        <div class="py-2 flex justify-center">
+          <div id="intervalOrb" class="w-44 h-44 rounded-3xl border-4 border-iosCardSecondary bg-iosBg flex flex-col items-center justify-center transition-all">
+            <span id="intervalStageLabel" class="text-xs uppercase font-bold tracking-widest text-iosLabelSecondary">Ready</span>
+            <span id="intervalDigitClock" class="text-5xl font-black font-mono text-white tracking-tighter my-1">00:20</span>
+            <span id="intervalRoundText" class="text-xs font-mono text-iosLabelSecondary">Round 1 / 6</span>
+          </div>
+        </div>
+
+        <!-- Interval presets row -->
+        <div id="intervalConfigGrid" class="grid grid-cols-3 gap-2 text-center text-xs">
+          <div class="bg-iosBg p-2 rounded-xl border border-iosSeparator/40">
+            <span class="text-[10px] text-iosLabelSecondary uppercase block">Work</span>
+            <input type="number" id="inWorkSec" value="20" class="w-full bg-transparent text-center font-bold text-white text-sm outline-none">
+          </div>
+          <div class="bg-iosBg p-2 rounded-xl border border-iosSeparator/40">
+            <span class="text-[10px] text-iosLabelSecondary uppercase block">Rest</span>
+            <input type="number" id="inRestSec" value="40" class="w-full bg-transparent text-center font-bold text-white text-sm outline-none">
+          </div>
+          <div class="bg-iosBg p-2 rounded-xl border border-iosSeparator/40">
+            <span class="text-[10px] text-iosLabelSecondary uppercase block">Rounds</span>
+            <input type="number" id="inRounds" value="6" class="w-full bg-transparent text-center font-bold text-white text-sm outline-none">
+          </div>
+        </div>
+
+        <!-- Timer Controls -->
+        <div class="flex items-center justify-center gap-3">
+          <button id="intervalPlayBtn" onclick="toggleIntervalTimer()" class="ios-tap flex-1 py-3 bg-iosBlue text-white font-bold text-sm rounded-xl shadow-lg shadow-iosBlue/20 flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="play" aria-hidden="true" class="lucide lucide-play w-4 h-4 fill-white"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path></svg>
+            <span>Start Interval</span>
+          </button>
+          <button onclick="resetIntervalTimer()" class="ios-tap w-12 h-12 bg-iosCardSecondary rounded-xl flex items-center justify-center text-iosLabelSecondary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="rotate-ccw" aria-hidden="true" class="lucide lucide-rotate-ccw w-4 h-4"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: LOG WORKOUT                         -->
+    <!-- ========================================== -->
+    <section id="tab-log" class="hidden p-4 space-y-4">
+      
+      <!-- Quick Record Form Card -->
+      <div class="bg-iosCard border border-iosSeparator/60 rounded-2xl p-4 space-y-3.5 shadow-lg">
+        <div class="flex justify-between items-center border-b border-iosSeparator/40 pb-2.5">
+          <h2 class="text-sm font-bold text-white">Record Training Session</h2>
+          <span class="text-xs text-iosTennisGreen font-mono">Today</span>
+        </div>
+
+        <form id="logForm" onsubmit="saveWorkoutLog(event)" class="space-y-3">
+          <div>
+            <label class="text-[11px] text-iosLabelSecondary font-semibold uppercase block mb-1">Session Focus</label>
+            <input type="text" id="logTitle" placeholder="e.g. 2H Backhand drive depth + Trap bar 225lb" required="" class="w-full bg-iosCardSecondary rounded-xl px-3 py-2 text-xs text-white placeholder-iosLabelSecondary focus:outline-none focus:ring-1 focus:ring-iosTennisGreen">
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[11px] text-iosLabelSecondary font-semibold uppercase block mb-1">Modality</label>
+              <select id="logModality" class="w-full bg-iosCardSecondary rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+                <option value="court">On-Court Drills</option>
+                <option value="gym">Gym Strength</option>
+                <option value="recovery">Active Recovery</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[11px] text-iosLabelSecondary font-semibold uppercase block mb-1">Duration (Min)</label>
+              <input type="number" id="logMinutes" value="60" min="10" max="240" class="w-full bg-iosCardSecondary rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-[11px] text-iosLabelSecondary font-semibold uppercase">Exertion (RPE Scale)</label>
+              <span id="rpeIndicator" class="text-xs font-bold text-iosTennisGreen">7 / 10</span>
+            </div>
+            <input type="range" id="logRPE" min="1" max="10" value="7" oninput="document.getElementById('rpeIndicator').textContent = this.value + ' / 10'" class="w-full accent-iosTennisGreen cursor-pointer">
+          </div>
+
+          <div>
+            <label class="text-[11px] text-iosLabelSecondary font-semibold uppercase block mb-1">Stroke Feedback &amp; Body Feel</label>
+            <textarea id="logNotes" rows="2" placeholder="Shoulders rotated cleanly on high backhands. Zero shoulder irritation on serve follow-through." class="w-full bg-iosCardSecondary rounded-xl p-2.5 text-xs text-white placeholder-iosLabelSecondary focus:outline-none focus:ring-1 focus:ring-iosTennisGreen"></textarea>
+          </div>
+
+          <button type="submit" class="ios-tap w-full py-2.5 bg-iosTennisGreen text-black font-bold text-xs rounded-xl shadow-md shadow-iosTennisGreen/20 flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus" aria-hidden="true" class="lucide lucide-plus w-4 h-4"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg> Save to iPhone Storage
+          </button>
+        </form>
+      </div>
+
+      <!-- Logs History Header -->
+      <div class="flex justify-between items-center px-1 pt-2">
+        <h3 class="text-xs font-semibold uppercase tracking-wider text-iosLabelSecondary">Logged Sessions (<span id="logCounter">1</span>)</h3>
+        <button onclick="clearHistoryLogs()" class="text-xs text-iosRed hover:underline">Clear History</button>
+      </div>
+
+      <div id="logsHistoryList" class="space-y-2.5">
+          <div class="bg-iosCard border border-iosSeparator/60 rounded-2xl p-3.5 space-y-1.5 shadow-sm">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border bg-iosOrange/15 text-iosOrange border-iosOrange/30">court</span>
+                <h4 class="text-xs font-bold text-white">On-Court Baseline Rhythm + Trap Bar Deadlifts</h4>
+              </div>
+              <span class="text-[10px] text-iosLabelSecondary font-mono">Yesterday</span>
+            </div>
+            <div class="flex items-center gap-3 text-[11px] text-iosLabelSecondary font-mono">
+              <span>⏱️ 75m</span>
+              <span>⚡ RPE 8/10</span>
+            </div>
+            <p class="text-[11px] text-slate-300 bg-iosBg p-2 rounded-xl border border-iosSeparator/40 leading-snug">High ball backhands had good clearance. Split step timing was on point throughout.</p>
+          </div>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: SETTINGS / EXPORT                   -->
+    <!-- ========================================== -->
+    <section id="tab-settings" class="hidden p-4 space-y-4">
+      <div class="bg-iosCard border border-iosSeparator/60 rounded-2xl overflow-hidden divide-y divide-iosSeparator/40 shadow-lg">
+        
+        <!-- App info item -->
+        <div class="p-4 flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-iosTennisGreen text-black font-black text-2xl flex items-center justify-center">
+            🎾
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Apex Tennis iOS</h3>
+            <p class="text-xs text-iosLabelSecondary">Version 3.2 • Offline iPhone WebApp</p>
+          </div>
+        </div>
+
+        <!-- Download button -->
+        <div onclick="downloadSelfApp()" class="ios-tap p-4 flex items-center justify-between cursor-pointer">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-iosTennisGreen/20 text-iosTennisGreen flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="download" aria-hidden="true" class="lucide lucide-download w-4 h-4"><path d="M12 15V3"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><path d="m7 10 5 5 5-5"></path></svg>
+            </div>
+            <div>
+              <span class="text-sm font-semibold text-white block">Download App File (.html)</span>
+              <span class="text-xs text-iosLabelSecondary">Save directly to iPhone Files app</span>
+            </div>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-right" aria-hidden="true" class="lucide lucide-chevron-right w-4 h-4 text-iosLabelSecondary"><path d="m9 18 6-6-6-6"></path></svg>
+        </div>
+
+        <!-- Add to Home Screen instructions -->
+        <div onclick="openModal('sheet-install')" class="ios-tap p-4 flex items-center justify-between cursor-pointer">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-iosBlue/20 text-iosBlue flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="smartphone" aria-hidden="true" class="lucide lucide-smartphone w-4 h-4"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"></rect><path d="M12 18h.01"></path></svg>
+            </div>
+            <div>
+              <span class="text-sm font-semibold text-white block">Add to iPhone Home Screen</span>
+              <span class="text-xs text-iosLabelSecondary">Run as a full-screen native app</span>
+            </div>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-right" aria-hidden="true" class="lucide lucide-chevron-right w-4 h-4 text-iosLabelSecondary"><path d="m9 18 6-6-6-6"></path></svg>
+        </div>
+
+        <!-- Export JSON -->
+        <div onclick="exportLogsJSON()" class="ios-tap p-4 flex items-center justify-between cursor-pointer">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-iosOrange/20 text-iosOrange flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="database" aria-hidden="true" class="lucide lucide-database w-4 h-4"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5V19A9 3 0 0 0 21 19V5"></path><path d="M3 12A9 3 0 0 0 21 12"></path></svg>
+            </div>
+            <div>
+              <span class="text-sm font-semibold text-white block">Export Workout Data (JSON)</span>
+              <span class="text-xs text-iosLabelSecondary">Backup records for iCloud or Mac</span>
+            </div>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-right" aria-hidden="true" class="lucide lucide-chevron-right w-4 h-4 text-iosLabelSecondary"><path d="m9 18 6-6-6-6"></path></svg>
+        </div>
+
+        <!-- Reset Microcycle -->
+        <div onclick="resetWeeklyChecklist()" class="ios-tap p-4 flex items-center justify-between cursor-pointer">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-iosRed/20 text-iosRed flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="rotate-ccw" aria-hidden="true" class="lucide lucide-rotate-ccw w-4 h-4"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+            </div>
+            <div>
+              <span class="text-sm font-semibold text-iosRed block">Reset Weekly Rings</span>
+              <span class="text-xs text-iosLabelSecondary">Start fresh for a new week</span>
+            </div>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="chevron-right" aria-hidden="true" class="lucide lucide-chevron-right w-4 h-4 text-iosLabelSecondary"><path d="m9 18 6-6-6-6"></path></svg>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- NATIVE iOS FROSTED GLASS BOTTOM TAB BAR   -->
+  <!-- ========================================== -->
+  <nav class="safe-bottom fixed bottom-0 left-0 right-0 ios-glass-bar border-t border-iosSeparator/60 z-40 px-2 pt-2">
+    <div class="max-w-md mx-auto grid grid-cols-5 gap-1">
+      
+      <button onclick="switchTab('today')" id="tabBtn-today" class="ios-tap flex flex-col items-center justify-center py-1 text-iosTennisGreen">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="calendar" aria-hidden="true" class="lucide lucide-calendar w-5 h-5"><path d="M8 2v3"></path><path d="M16 2v3"></path><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M3 9h18"></path></svg>
+        <span class="text-[10px] font-medium tracking-tight mt-1">Today</span>
+      </button>
+
+      <button onclick="switchTab('drills')" id="tabBtn-drills" class="ios-tap flex flex-col items-center justify-center py-1 text-iosLabelSecondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="book-open" aria-hidden="true" class="lucide lucide-book-open w-5 h-5"><path d="M12 5v16"></path><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"></path></svg>
+        <span class="text-[10px] font-medium tracking-tight mt-1">Drills</span>
+      </button>
+
+      <button onclick="switchTab('timer')" id="tabBtn-timer" class="ios-tap flex flex-col items-center justify-center py-1 text-iosLabelSecondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="timer" aria-hidden="true" class="lucide lucide-timer w-5 h-5"><line x1="10" x2="14" y1="2" y2="2"></line><line x1="12" x2="15" y1="14" y2="11"></line><circle cx="12" cy="14" r="8"></circle></svg>
+        <span class="text-[10px] font-medium tracking-tight mt-1">Timer</span>
+      </button>
+
+      <button onclick="switchTab('log')" id="tabBtn-log" class="ios-tap flex flex-col items-center justify-center py-1 text-iosLabelSecondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="activity" aria-hidden="true" class="lucide lucide-activity w-5 h-5"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path></svg>
+        <span class="text-[10px] font-medium tracking-tight mt-1">Log</span>
+      </button>
+
+      <button onclick="switchTab('settings')" id="tabBtn-settings" class="ios-tap flex flex-col items-center justify-center py-1 text-iosLabelSecondary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="settings" aria-hidden="true" class="lucide lucide-settings w-5 h-5"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        <span class="text-[10px] font-medium tracking-tight mt-1">Settings</span>
+      </button>
+
+    </div>
+  </nav>
+
+  <!-- ========================================== -->
+  <!-- MODAL: DRILL INSPECTOR SHEET               -->
+  <!-- ========================================== -->
+  <div id="sheet-drill" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex flex-col justify-end">
+    <div class="bg-iosCard border-t border-iosSeparator rounded-t-3xl max-h-[85vh] overflow-y-auto p-5 space-y-4 ios-scroll safe-bottom">
+      <div class="w-10 h-1 bg-iosSeparator rounded-full mx-auto mb-2"></div>
+      <div class="flex justify-between items-start">
+        <div>
+          <span id="modalDrillBadge" class="text-[10px] font-bold uppercase tracking-wider text-iosTennisGreen px-2 py-0.5 rounded-full bg-iosTennisGreen/10 border border-iosTennisGreen/30">Category</span>
+          <h2 id="modalDrillTitle" class="text-lg font-bold text-white mt-1">Drill Title</h2>
+        </div>
+        <button onclick="closeModal('sheet-drill')" class="w-8 h-8 rounded-full bg-iosCardSecondary flex items-center justify-center text-iosLabelSecondary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x w-4 h-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="p-3 bg-iosBg rounded-xl border border-iosSeparator/40 space-y-1">
+        <span class="text-[10px] uppercase font-bold text-iosTennisGreen">Target Biomechanics</span>
+        <p id="modalDrillTarget" class="text-xs text-slate-300 font-medium"></p>
+      </div>
+
+      <div class="space-y-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-iosLabelSecondary">Step-by-Step Execution:</span>
+        <ul id="modalDrillCues" class="space-y-1.5 text-xs text-slate-300"></ul>
+      </div>
+
+      <div class="p-3 bg-iosCardSecondary rounded-xl text-xs space-y-1">
+        <span class="text-[10px] uppercase font-bold text-iosOrange">Common Flaw to Avoid:</span>
+        <p id="modalDrillMistake" class="text-slate-300"></p>
+      </div>
+
+      <button onclick="loadDrillIntoTimer()" class="ios-tap w-full py-3 bg-iosTennisGreen text-black font-bold text-xs rounded-xl flex items-center justify-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="timer" aria-hidden="true" class="lucide lucide-timer w-4 h-4"><line x1="10" x2="14" y1="2" y2="2"></line><line x1="12" x2="15" y1="14" y2="11"></line><circle cx="12" cy="14" r="8"></circle></svg> Start with Timer
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ADD TO HOME SCREEN INSTRUCTIONS     -->
+  <!-- ========================================== -->
+  <div id="sheet-install" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
+    <div class="bg-iosCard border-t border-iosSeparator rounded-t-3xl p-6 space-y-4 safe-bottom">
+      <div class="w-10 h-1 bg-iosSeparator rounded-full mx-auto mb-2"></div>
+      <div class="flex justify-between items-center">
+        <h2 class="text-base font-bold text-white">Install as iPhone App</h2>
+        <button onclick="closeModal('sheet-install')" class="w-8 h-8 rounded-full bg-iosCardSecondary flex items-center justify-center text-iosLabelSecondary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="x" aria-hidden="true" class="lucide lucide-x w-4 h-4"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+        </button>
+      </div>
+
+      <p class="text-xs text-iosLabelSecondary leading-relaxed">
+        Run Apex Tennis in full-screen standalone mode with no Safari address bar:
+      </p>
+
+      <div class="space-y-3 pt-2">
+        <div class="flex items-center gap-3 bg-iosBg p-3 rounded-xl border border-iosSeparator/40">
+          <div class="w-8 h-8 rounded-lg bg-iosBlue/20 text-iosBlue flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="share" aria-hidden="true" class="lucide lucide-share w-4 h-4"><path d="M12 2v13"></path><path d="m16 6-4-4-4 4"></path><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path></svg>
+          </div>
+          <span class="text-xs text-white">1. Tap Safari's <strong>Share</strong> button at bottom</span>
+        </div>
+
+        <div class="flex items-center gap-3 bg-iosBg p-3 rounded-xl border border-iosSeparator/40">
+          <div class="w-8 h-8 rounded-lg bg-iosTennisGreen/20 text-iosTennisGreen flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-lucide="plus-square" aria-hidden="true" class="lucide lucide-plus-square w-4 h-4"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M8 12h8"></path><path d="M12 8v8"></path></svg>
+          </div>
+          <span class="text-xs text-white">2. Scroll down and tap <strong>Add to Home Screen</strong></span>
+        </div>
+
+        <div class="flex items-center gap-3 bg-iosBg p-3 rounded-xl border border-iosSeparator/40">
+          <div class="w-8 h-8 rounded-lg bg-iosCardSecondary text-white flex items-center justify-center font-bold text-xs">
+            🎾
+          </div>
+          <span class="text-xs text-white">3. Launch from your iPhone home screen</span>
+        </div>
+      </div>
+
+      <button onclick="closeModal('sheet-install')" class="ios-tap w-full py-3 bg-iosCardSecondary text-white font-semibold text-xs rounded-xl">
+        Got It
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------------------
+    // 1. DATA BLUEPRINT: 3 ON-COURT + 3 GYM MICROCYCLE
+    // -------------------------------------------------------------------------
+    const WEEKLY_PLAN = [
+      {
+        id: 'mon',
+        day: 'Mon',
+        fullName: 'Monday',
+        title: 'On-Court: Baseline Rhythm & Split-Step Agility',
+        type: 'court',
+        duration: '75 min',
+        intensity: 'High',
+        focus: 'Active split-step timing on ball contact, 2-handed backhand drive depth, and lateral recovery.',
+        exercises: [
+          { id: 'm1', name: 'Dynamic Shadow Swings & Split Drops', time: '10 min', cue: 'Perform 30 continuous shadow strokes, landing softly on balls of feet.' },
+          { id: 'm2', name: 'Deep Crosscourt Rally Target Sets', time: '20 min', cue: 'Clear net 3–4 feet high; drive ball past service line.' },
+          { id: 'm3', name: 'Split-Step Reaction Shuffle Drill', time: '15 min', cue: 'Hop the millisecond partner or machine initiates stroke.' },
+          { id: 'm4', name: 'High-Ball 2-Handed Backhand Drives', time: '20 min', cue: 'Take racquet above shoulder level early; let left arm dominate push-through.' },
+          { id: 'm5', name: 'Achilles & Hip Flexor Decompression', time: '10 min', cue: 'Decompress calves and hips after explosive stops.' }
+        ]
+      },
+      {
+        id: 'tue',
+        day: 'Tue',
+        fullName: 'Tuesday',
+        title: 'Gym Strength A: Lower Body & Rotational Drive',
+        type: 'gym',
+        duration: '55 min',
+        intensity: 'High',
+        focus: 'Triple extension power, ground reaction forces, and rotational kinetic energy.',
+        exercises: [
+          { id: 't1', name: 'Trap Bar Hex Deadlift', time: '15 min', cue: 'Brace core, push floor away. Direct carryover to serve jump.' },
+          { id: 't2', name: 'Rotational Med Ball Scoop Throws', time: '10 min', cue: 'Load rear hip, pivot foot, release violently against solid wall.' },
+          { id: 't3', name: 'Goblet Lateral Lunges (Groin Armor)', time: '10 min', cue: 'Protects adductors during wide defensive slide recoveries.' },
+          { id: 't4', name: 'Achilles Pogo Jumps (Ankle Stiffness)', time: '8 min', cue: 'Short ground contact time; stiff springs on court.' },
+          { id: 't5', name: 'Pallof Press Anti-Rotation Core Hold', time: '8 min', cue: 'Lock pelvis straight forward against band resistance.' }
+        ]
+      },
+      {
+        id: 'wed',
+        day: 'Wed',
+        fullName: 'Wednesday',
+        title: 'On-Court: Transition Footwork & Approach Attack',
+        type: 'court',
+        duration: '70 min',
+        intensity: 'Mod-High',
+        focus: 'Short ball approach footwork, forward momentum transfer, and volley depth.',
+        exercises: [
+          { id: 'w1', name: 'Short Ball Approach & Glide Steps', time: '15 min', cue: 'Hit ball on the rise, flow directly into forward sprint.' },
+          { id: 'w2', name: 'Punch Volley & Overhead Stick', time: '15 min', cue: 'Keep racquet above wrist; punch out in front.' },
+          { id: 'w3', name: 'Serve & +1 Aggressive Forehand Pattern', time: '20 min', cue: 'Explode up from trophy pose, land inside line and attack.' },
+          { id: 'w4', name: 'Crosscourt-to-Down-the-Line Directionals', time: '20 min', cue: 'Change direction early without giving away shot intent.' }
+        ]
+      },
+      {
+        id: 'thu',
+        day: 'Thu',
+        fullName: 'Thursday',
+        title: 'Gym Strength B: Upper Chain & Shoulder Deceleration',
+        type: 'gym',
+        duration: '50 min',
+        intensity: 'Moderate',
+        focus: 'Posterior shoulder endurance, scapular upward rotation, and rotational pulling.',
+        exercises: [
+          { id: 'th1', name: 'Single-Arm Dumbbell Rows', time: '12 min', cue: 'Drive elbow to hip pocket; crucial for braking the racquet.' },
+          { id: 'th2', name: 'Rope Face Pulls with External Rotation', time: '10 min', cue: 'Knuckles back, pull hands past ears to protect rotator cuff.' },
+          { id: 'th3', name: 'Dumbbell Incline Bench Press', time: '10 min', cue: 'Controlled 3-second descent, press with full chest activation.' },
+          { id: 'th4', name: 'Prone Y-T-W Shoulder Raises', time: '10 min', cue: 'Use 3-5 lbs; target lower traps and infraspinatus.' },
+          { id: 'th5', name: 'Hanging Knee Raises & Hollow Rocks', time: '8 min', cue: 'Braces anterior core to prevent hyperextension on kick serves.' }
+        ]
+      },
+      {
+        id: 'fri',
+        day: 'Fri',
+        fullName: 'Friday',
+        title: 'On-Court: Match Simulation & Scramble Speed',
+        type: 'court',
+        duration: '80 min',
+        intensity: 'High',
+        focus: 'Pressure match points, drop shot sprints, and serve placement consistency.',
+        exercises: [
+          { id: 'f1', name: 'Deep Baseline Rally Ladder (20-ball sets)', time: '20 min', cue: 'Maintain consistent ball clearance 3 feet above net cord.' },
+          { id: 'f2', name: 'Drop Shot Sprint to Lob Recovery', time: '15 min', cue: 'Explosive first 3 sprint steps forward, quick drop-step back.' },
+          { id: 'f3', name: '10-Point Match Tiebreaks (x3)', time: '30 min', cue: 'Split step prior to every opponent impact without fail.' },
+          { id: 'f4', name: 'Target Serve Precision (Wide, T, Body)', time: '15 min', cue: 'Hit 10 to each target zone; track 1st serve %.' }
+        ]
+      },
+      {
+        id: 'sat',
+        day: 'Sat',
+        fullName: 'Saturday',
+        title: 'Gym Strength C: Plyometrics & Tennis Conditioning',
+        type: 'gym',
+        duration: '45 min',
+        intensity: 'High',
+        focus: 'Foot cadence, lateral power bounds, and aerobic sprint endurance.',
+        exercises: [
+          { id: 's1', name: 'Agility Ladder Footwork (Ickey Shuffle)', time: '12 min', cue: 'Light, rapid taps; keep center of gravity low.' },
+          { id: 's2', name: 'Lateral Skater Bounds with Stick', time: '10 min', cue: 'Single-leg landing balance; absorb force through glute.' },
+          { id: 's3', name: 'High-Cadence Jump Rope Boxer Step', time: '15 min', cue: 'Rotate with wrists, stay on balls of feet.' },
+          { id: 's4', name: 'Bike / Rower Tabata Protocol (20s on / 10s off)', time: '8 min', cue: 'All-out anaerobic lactic threshold training.' }
+        ]
+      },
+      {
+        id: 'sun',
+        day: 'Sun',
+        fullName: 'Sunday',
+        title: 'Active Recovery: Thoracic Mobility & Arm Health',
+        type: 'recovery',
+        duration: '40 min',
+        intensity: 'Low',
+        focus: 'Thoracic spine rotation, wrist extensor eccentrics (anti-tennis elbow), and breathwork.',
+        exercises: [
+          { id: 'su1', name: 'Thoracic Extension & Open Book Rotations', time: '10 min', cue: 'Rotate from mid-back; opens up serve and forehand coil.' },
+          { id: 'su2', name: '90/90 Hip Mobility & Glute Stretch', time: '10 min', cue: 'Unlocks tight hips from multi-directional baseline sliding.' },
+          { id: 'su3', name: 'Tyler Twist / Wrist Extensor Band Eccentrics', time: '10 min', cue: 'Prevents and eliminates tennis elbow tendonitis.' },
+          { id: 'su4', name: 'Diaphragmatic Breathing & Foam Rolling', time: '10 min', cue: 'Downregulates nervous system for the week ahead.' }
+        ]
+      }
+    ];
+
+    const DRILLS_LIBRARY = [
+      {
+        id: 'dl-1',
+        category: 'footwork',
+        categoryName: 'Footwork & Agility',
+        title: 'Split-Step Reaction & Deceleration Hop',
+        target: 'Dynamic first-step acceleration to corner balls',
+        time: '15 min',
+        cues: [
+          'Initiate hop right as opponent reaches racquet preparation apex.',
+          'Land with feet wider than shoulders, knees bent, weight on forefeet.',
+          'Gravity step directly toward the ball trajectory.'
+        ],
+        mistake: 'Landing after opponent has already struck the ball, causing late movement.'
+      },
+      {
+        id: 'dl-2',
+        category: 'swing',
+        categoryName: 'Stroke Mechanics',
+        title: 'High-Ball 2-Handed Backhand Take-Back',
+        target: 'Dominating shoulder-high topspin backhands',
+        time: '20 min',
+        cues: [
+          'Coil shoulders early; take racquet tip high above incoming ball height.',
+          'Stay loaded in back hip; do not stand straight up at contact.',
+          'Non-dominant left arm accelerates through contact plane with high finish.'
+        ],
+        mistake: 'Taking racquet back low and scooping upward with wrists.'
+      },
+      {
+        id: 'dl-3',
+        category: 'swing',
+        categoryName: 'Stroke Mechanics',
+        title: 'Open-Stance Forehand Hip Coil & Fire',
+        target: 'Heavy topspin baseline depth under speed',
+        time: '20 min',
+        cues: [
+          'Plant outside right foot firmly outside the ball line.',
+          'Unit turn chest 90 degrees away from the net.',
+          'Uncoil hips first, dragging racquet forward for whip lag.'
+        ],
+        mistake: 'Opening chest before hips rotate, losing kinetic chain acceleration.'
+      },
+      {
+        id: 'dl-4',
+        category: 'gym',
+        categoryName: 'Gym Strength',
+        title: 'Rotational Medicine Ball Wall Scoop',
+        target: 'Core rotational torque for groundstrokes',
+        time: '12 min',
+        cues: [
+          'Stand sideways 4 feet from solid wall holding 8lb med ball.',
+          'Load rear hip like an open stance baseline stroke.',
+          'Violently drive rear foot into ground and launch ball with core power.'
+        ],
+        mistake: 'Throwing purely with upper arms instead of pivoting rear foot and hips.'
+      },
+      {
+        id: 'dl-5',
+        category: 'gym',
+        categoryName: 'Gym Strength',
+        title: 'Trap Bar Hex Deadlift',
+        target: 'Ground reaction force and serve leg drive',
+        time: '15 min',
+        cues: [
+          'Grasp neutral handles, brace core, keep spine neutral.',
+          'Push the earth away explosively through mid-foot.'
+        ],
+        mistake: 'Rounding lower back or letting knees collapse inwards.'
+      },
+      {
+        id: 'dl-6',
+        category: 'prehab',
+        categoryName: 'Arm Prehab & Mobility',
+        title: 'Tyler Twist with FlexBar (Anti-Tennis Elbow)',
+        target: 'Extensor Carpi Radialis tendon remodeling',
+        time: '8 min',
+        cues: [
+          'Hold bar vertically, twist top with healthy hand.',
+          'Bring arms parallel to floor, slowly un-twist with target arm for 4 seconds.'
+        ],
+        mistake: 'Rushing the eccentric lowering phase.'
+      }
+    ];
+
+    // -------------------------------------------------------------------------
+    // 2. STATE INITIALIZATION WITH LOCALSTORAGE
+    // -------------------------------------------------------------------------
+    let currentDayId = 'mon';
+    let completedExercises = JSON.parse(localStorage.getItem('apex_ex_completed') || '{}');
+    let completedDaysMap = JSON.parse(localStorage.getItem('apex_days_done') || '{}');
+    let workoutLogs = JSON.parse(localStorage.getItem('apex_ios_logs') || '[]');
+    let currentDrillFilter = 'all';
+
+    // -------------------------------------------------------------------------
+    // 3. SYNTHESIZED AUDIO ENGINE (iOS Unlocked)
+    // -------------------------------------------------------------------------
+    let audioCtx = null;
+    let isSoundOn = true;
+
+    function initAudioOnUserTap() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    document.addEventListener('touchstart', initAudioOnUserTap, { once: true });
+    document.addEventListener('click', initAudioOnUserTap, { once: true });
+
+    function playBeep(freq = 880, dur = 0.06) {
+      if (!isSoundOn) return;
+      initAudioOnUserTap();
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + dur);
+      } catch (e) {
+        console.warn('Audio note error', e);
+      }
+    }
+
+    function toggleAudioMute() {
+      isSoundOn = !isSoundOn;
+      const btn = document.getElementById('audioMuteBtn');
+      btn.innerHTML = isSoundOn ? '<i data-lucide="volume-2" class="w-5 h-5"></i>' : '<i data-lucide="volume-x" class="w-5 h-5 text-iosRed"></i>';
+      lucide.createIcons();
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. TAB NAVIGATION
+    // -------------------------------------------------------------------------
+    function switchTab(tabId) {
+      ['today', 'drills', 'timer', 'log', 'settings'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+        const b = document.getElementById(`tabBtn-${t}`);
+        b.classList.remove('text-iosTennisGreen');
+        b.classList.add('text-iosLabelSecondary');
+      });
+
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tabBtn-${tabId}`);
+      activeBtn.classList.remove('text-iosLabelSecondary');
+      activeBtn.classList.add('text-iosTennisGreen');
+
+      // Scroll top of view
+      document.getElementById('mainScrollView').scrollTop = 0;
+      lucide.createIcons();
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. SCHEDULE & TODAY TAB LOGIC
+    // -------------------------------------------------------------------------
+    function renderDaySegmentControl() {
+      const container = document.getElementById('daySegmentControl');
+      container.innerHTML = WEEKLY_PLAN.map(item => {
+        const isSelected = item.id === currentDayId;
+        const isFinished = !!completedDaysMap[item.id];
+        return `
+          <button onclick="selectDay('${item.id}')" class="ios-tap py-1.5 rounded-lg flex flex-col items-center justify-center transition ${
+            isSelected ? 'bg-iosCard text-white shadow-md' : 'text-iosLabelSecondary'
+          }">
+            <span class="text-[11px] font-bold">${item.day}</span>
+            <span class="w-1.5 h-1.5 rounded-full mt-1 ${isFinished ? 'bg-iosTennisGreen' : 'bg-transparent'}"></span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectDay(dayId) {
+      currentDayId = dayId;
+      renderDaySegmentControl();
+      renderActiveDayCard();
+    }
+
+    function renderActiveDayCard() {
+      const day = WEEKLY_PLAN.find(d => d.id === currentDayId);
+      const isDone = !!completedDaysMap[day.id];
+      const card = document.getElementById('dayDetailCard');
+
+      const badgeColor = day.type === 'court' 
+        ? 'bg-iosOrange/15 text-iosOrange border-iosOrange/30' 
+        : day.type === 'gym' 
+        ? 'bg-iosBlue/15 text-iosBlue border-iosBlue/30' 
+        : 'bg-iosTennisGreen/15 text-iosTennisGreen border-iosTennisGreen/30';
+
+      card.innerHTML = `
+        <div class="flex items-start justify-between border-b border-iosSeparator/50 pb-3">
+          <div>
+            <div class="flex items-center gap-1.5 mb-1">
+              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${badgeColor}">
+                ${day.type === 'court' ? '🎾 On-Court' : day.type === 'gym' ? '🏋️ Gym Power' : '🧘 Recovery'}
+              </span>
+              <span class="text-xs text-iosLabelSecondary font-mono">• ${day.duration}</span>
+            </div>
+            <h2 class="text-base font-bold text-white tracking-tight">${day.title}</h2>
+          </div>
+          <button onclick="toggleDayCompleted('${day.id}')" class="ios-tap px-3 py-1.5 rounded-full text-xs font-bold transition ${
+            isDone ? 'bg-iosTennisGreen text-black shadow-md' : 'bg-iosCardSecondary text-iosLabelSecondary border border-iosSeparator/40'
+          }">
+            ${isDone ? '✓ Finished' : 'Mark Done'}
+          </button>
+        </div>
+
+        <!-- Biomechanics focus banner -->
+        <div class="p-3 bg-iosBg rounded-xl border border-iosSeparator/40 flex items-start gap-2.5">
+          <i data-lucide="target" class="w-4 h-4 text-iosTennisGreen shrink-0 mt-0.5"></i>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-iosTennisGreen block">Primary Skill Objective</span>
+            <p class="text-xs text-slate-300 font-medium leading-relaxed">${day.focus}</p>
+          </div>
+        </div>
+
+        <!-- Exercise Checklist -->
+        <div class="space-y-2">
+          <span class="text-[11px] uppercase font-bold tracking-wider text-iosLabelSecondary block">Exercise Checklist</span>
+          ${day.exercises.map((ex, idx) => {
+            const checked = !!completedExercises[ex.id];
+            return `
+              <div onclick="toggleExerciseCheck('${ex.id}')" class="ios-tap bg-iosBg/80 border border-iosSeparator/40 rounded-xl p-3 flex items-start gap-3 cursor-pointer">
+                <div class="w-5 h-5 rounded-md mt-0.5 flex items-center justify-center border transition ${
+                  checked ? 'bg-iosTennisGreen border-iosTennisGreen text-black' : 'border-iosSeparator bg-iosCardSecondary text-transparent'
+                }">
+                  <i data-lucide="check" class="w-3.5 h-3.5 stroke-[3]"></i>
+                </div>
+                <div class="flex-1">
+                  <div class="flex justify-between items-center">
+                    <h4 class="text-xs font-bold text-white ${checked ? 'line-through text-iosLabelSecondary' : ''}">${ex.name}</h4>
+                    <span class="text-[10px] text-iosLabelSecondary font-mono">${ex.time}</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-0.5">${ex.cue}</p>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <button onclick="switchTab('timer')" class="ios-tap w-full py-2.5 bg-iosCardSecondary hover:bg-iosSeparator text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2">
+          <i data-lucide="timer" class="w-4 h-4 text-iosTennisGreen"></i> Launch Split-Step Timer
+        </button>
+      `;
+      lucide.createIcons();
+    }
+
+    function toggleExerciseCheck(exId) {
+      completedExercises[exId] = !completedExercises[exId];
+      localStorage.setItem('apex_ex_completed', JSON.stringify(completedExercises));
+      
+      // Auto-check if all exercises for the active day are done
+      const currentDay = WEEKLY_PLAN.find(d => d.id === currentDayId);
+      const allDone = currentDay.exercises.every(e => completedExercises[e.id]);
+      completedDaysMap[currentDayId] = allDone;
+      localStorage.setItem('apex_days_done', JSON.stringify(completedDaysMap));
+
+      updateRings();
+      renderDaySegmentControl();
+      renderActiveDayCard();
+    }
+
+    function toggleDayCompleted(dayId) {
+      completedDaysMap[dayId] = !completedDaysMap[dayId];
+      // Mark all exercises of this day to match
+      const day = WEEKLY_PLAN.find(d => d.id === dayId);
+      day.exercises.forEach(e => {
+        completedExercises[e.id] = completedDaysMap[dayId];
+      });
+
+      localStorage.setItem('apex_days_done', JSON.stringify(completedDaysMap));
+      localStorage.setItem('apex_ex_completed', JSON.stringify(completedExercises));
+
+      updateRings();
+      renderDaySegmentControl();
+      renderActiveDayCard();
+    }
+
+    function updateRings() {
+      const doneCount = Object.values(completedDaysMap).filter(Boolean).length;
+      const pct = Math.round((doneCount / 7) * 100);
+      document.getElementById('healthRingPercent').textContent = pct + '%';
+      document.getElementById('healthRingFraction').textContent = `${doneCount}/7 Sessions`;
+      document.getElementById('ringSvgPath').setAttribute('stroke-dasharray', `${pct}, 100`);
+      document.getElementById('healthRingStatus').textContent = doneCount >= 5 ? '🔥 3+3 Target Completed!' : `${5 - Math.min(5, doneCount)} to hit weekly goal`;
+    }
+
+    function resetWeeklyChecklist() {
+      completedDaysMap = {};
+      completedExercises = {};
+      localStorage.removeItem('apex_days_done');
+      localStorage.removeItem('apex_ex_completed');
+      updateRings();
+      renderDaySegmentControl();
+      renderActiveDayCard();
+      closeModal('sheet-install');
+      switchTab('today');
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. DRILL VAULT & INSPECTOR MODAL
+    // -------------------------------------------------------------------------
+    function setDrillFilter(cat) {
+      currentDrillFilter = cat;
+      document.querySelectorAll('.drill-cat-btn').forEach(btn => {
+        if (btn.getAttribute('data-cat') === cat) {
+          btn.className = 'drill-cat-btn ios-tap px-3 py-1.5 rounded-full bg-iosTennisGreen text-black font-semibold shrink-0';
+        } else {
+          btn.className = 'drill-cat-btn ios-tap px-3 py-1.5 rounded-full bg-iosCardSecondary text-iosLabelSecondary shrink-0';
+        }
+      });
+      renderDrillLibrary();
+    }
+
+    function renderDrillLibrary() {
+      const q = (document.getElementById('drillSearch').value || '').toLowerCase();
+      const container = document.getElementById('drillsListContainer');
+
+      const filtered = DRILLS_LIBRARY.filter(d => {
+        const matchesCat = currentDrillFilter === 'all' || d.category === currentDrillFilter;
+        const matchesQuery = d.title.toLowerCase().includes(q) || d.target.toLowerCase().includes(q);
+        return matchesCat && matchesQuery;
+      });
+
+      container.innerHTML = filtered.map(d => `
+        <div onclick="inspectDrill('${d.id}')" class="ios-tap bg-iosCard border border-iosSeparator/60 rounded-2xl p-4 flex items-center justify-between cursor-pointer shadow-sm">
+          <div class="space-y-1">
+            <span class="text-[10px] uppercase font-bold tracking-wider text-iosTennisGreen">${d.categoryName}</span>
+            <h3 class="text-sm font-bold text-white tracking-tight">${d.title}</h3>
+            <p class="text-xs text-iosLabelSecondary font-medium">${d.target}</p>
+          </div>
+          <div class="flex items-center gap-2 pl-3">
+            <span class="text-xs text-iosLabelSecondary font-mono">${d.time}</span>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-iosLabelSecondary"></i>
+          </div>
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    let activeModalDrill = null;
+    function inspectDrill(id) {
+      const d = DRILLS_LIBRARY.find(item => item.id === id);
+      activeModalDrill = d;
+      document.getElementById('modalDrillBadge').textContent = d.categoryName;
+      document.getElementById('modalDrillTitle').textContent = d.title;
+      document.getElementById('modalDrillTarget').textContent = d.target;
+      document.getElementById('modalDrillMistake').textContent = d.mistake;
+      document.getElementById('modalDrillCues').innerHTML = d.cues.map(c => `
+        <li class="flex items-start gap-2">
+          <span class="text-iosTennisGreen font-bold">•</span>
+          <span>${c}</span>
+        </li>
+      `).join('');
+      openModal('sheet-drill');
+    }
+
+    function loadDrillIntoTimer() {
+      closeModal('sheet-drill');
+      switchTab('timer');
+      switchTimerSubMode('cadence');
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. TIMERS (CADENCE & INTERVAL STOPWATCH)
+    // -------------------------------------------------------------------------
+    let cadenceBpm = 70;
+    let cadenceActive = false;
+    let cadenceIntervalId = null;
+
+    function switchTimerSubMode(mode) {
+      document.getElementById('subView-cadence').classList.toggle('hidden', mode !== 'cadence');
+      document.getElementById('subView-interval').classList.toggle('hidden', mode !== 'interval');
+
+      document.getElementById('timerSubBtn-cadence').className = mode === 'cadence'
+        ? 'ios-tap py-2 rounded-lg bg-iosCard text-white shadow-sm'
+        : 'ios-tap py-2 rounded-lg text-iosLabelSecondary';
+      document.getElementById('timerSubBtn-interval').className = mode === 'interval'
+        ? 'ios-tap py-2 rounded-lg bg-iosCard text-white shadow-sm'
+        : 'ios-tap py-2 rounded-lg text-iosLabelSecondary';
+    }
+
+    function adjustBPM(val) {
+      cadenceBpm = Number(val);
+      document.getElementById('cadenceBpmText').textContent = cadenceBpm;
+      if (cadenceActive) {
+        clearInterval(cadenceIntervalId);
+        startCadenceLoop();
+      }
+    }
+
+    function toggleCadenceMetronome() {
+      cadenceActive = !cadenceActive;
+      const btn = document.getElementById('cadencePlayBtn');
+      const orb = document.getElementById('cadencePulseOrb');
+
+      if (cadenceActive) {
+        btn.className = 'ios-tap flex items-center justify-center gap-2 flex-1 py-3 bg-iosRed text-white font-bold text-sm rounded-xl shadow-lg';
+        btn.innerHTML = '<i data-lucide="pause" class="w-4 h-4"></i><span>Stop Cadence</span>';
+        startCadenceLoop();
+      } else {
+        clearInterval(cadenceIntervalId);
+        btn.className = 'ios-tap flex items-center justify-center gap-2 flex-1 py-3 bg-iosTennisGreen text-black font-bold text-sm rounded-xl shadow-lg shadow-iosTennisGreen/20';
+        btn.innerHTML = '<i data-lucide="play" class="w-4 h-4 fill-black"></i><span>Start Cadence</span>';
+        orb.className = 'w-36 h-36 rounded-full border-4 border-iosCardSecondary bg-iosBg flex flex-col items-center justify-center transition-all';
+      }
+      lucide.createIcons();
+    }
+
+    function startCadenceLoop() {
+      const ms = (60 / cadenceBpm) * 1000;
+      pulseCadence();
+      cadenceIntervalId = setInterval(pulseCadence, ms);
+    }
+
+    function pulseCadence() {
+      playBeep(940, 0.05);
+      const orb = document.getElementById('cadencePulseOrb');
+      orb.classList.add('border-iosTennisGreen', 'scale-105');
+      setTimeout(() => {
+        orb.classList.remove('scale-105');
+      }, 120);
+    }
+
+    // Interval Timer state
+    let intervalState = 'idle'; // 'idle' | 'work' | 'rest'
+    let intervalTimeLeft = 20;
+    let intervalWork = 20;
+    let intervalRest = 40;
+    let intervalTotalRounds = 6;
+    let intervalCurrentRound = 1;
+    let intervalTimerLoop = null;
+
+    function toggleIntervalTimer() {
+      if (intervalState === 'idle') {
+        intervalWork = Number(document.getElementById('inWorkSec').value) || 20;
+        intervalRest = Number(document.getElementById('inRestSec').value) || 40;
+        intervalTotalRounds = Number(document.getElementById('inRounds').value) || 6;
+        intervalCurrentRound = 1;
+        intervalTimeLeft = intervalWork;
+        intervalState = 'work';
+        playBeep(1200, 0.2);
+        updateIntervalDisplay();
+        runIntervalLoop();
+      } else {
+        clearInterval(intervalTimerLoop);
+        intervalState = 'idle';
+        document.getElementById('intervalPlayBtn').innerHTML = '<i data-lucide="play" class="w-4 h-4 fill-white"></i><span>Resume</span>';
+      }
+      lucide.createIcons();
+    }
+
+    function runIntervalLoop() {
+      document.getElementById('intervalPlayBtn').innerHTML = '<i data-lucide="pause" class="w-4 h-4"></i><span>Pause</span>';
+      intervalTimerLoop = setInterval(() => {
+        intervalTimeLeft--;
+        if (intervalTimeLeft <= 3 && intervalTimeLeft > 0) {
+          playBeep(440, 0.04);
+        }
+        if (intervalTimeLeft <= 0) {
+          if (intervalState === 'work') {
+            playBeep(620, 0.3);
+            if (intervalCurrentRound >= intervalTotalRounds) {
+              clearInterval(intervalTimerLoop);
+              intervalState = 'idle';
+              document.getElementById('intervalStageLabel').textContent = 'Finished 🏆';
+              document.getElementById('intervalPlayBtn').innerHTML = '<i data-lucide="play" class="w-4 h-4 fill-white"></i><span>Restart</span>';
+              return;
+            } else {
+              intervalState = 'rest';
+              intervalTimeLeft = intervalRest;
+            }
+          } else if (intervalState === 'rest') {
+            playBeep(1200, 0.25);
+            intervalCurrentRound++;
+            intervalState = 'work';
+            intervalTimeLeft = intervalWork;
+          }
+        }
+        updateIntervalDisplay();
+      }, 1000);
+    }
+
+    function resetIntervalTimer() {
+      clearInterval(intervalTimerLoop);
+      intervalState = 'idle';
+      intervalCurrentRound = 1;
+      intervalWork = Number(document.getElementById('inWorkSec').value) || 20;
+      intervalTimeLeft = intervalWork;
+      document.getElementById('intervalPlayBtn').innerHTML = '<i data-lucide="play" class="w-4 h-4 fill-white"></i><span>Start Interval</span>';
+      updateIntervalDisplay();
+      lucide.createIcons();
+    }
+
+    function updateIntervalDisplay() {
+      const orb = document.getElementById('intervalOrb');
+      const min = String(Math.floor(intervalTimeLeft / 60)).padStart(2, '0');
+      const sec = String(intervalTimeLeft % 60).padStart(2, '0');
+      document.getElementById('intervalDigitClock').textContent = `${min}:${sec}`;
+      document.getElementById('intervalRoundText').textContent = `Round ${intervalCurrentRound} / ${intervalTotalRounds}`;
+
+      if (intervalState === 'work') {
+        document.getElementById('intervalStageLabel').textContent = '⚡ Court Sprint Work';
+        orb.className = 'w-44 h-44 rounded-3xl border-4 border-iosBlue bg-iosBlue/10 flex flex-col items-center justify-center transition shadow-lg shadow-iosBlue/20';
+      } else if (intervalState === 'rest') {
+        document.getElementById('intervalStageLabel').textContent = '💨 Recovery Breathe';
+        orb.className = 'w-44 h-44 rounded-3xl border-4 border-iosTennisGreen bg-iosTennisGreen/10 flex flex-col items-center justify-center transition shadow-lg shadow-iosTennisGreen/20';
+      } else {
+        document.getElementById('intervalStageLabel').textContent = 'Ready';
+        orb.className = 'w-44 h-44 rounded-3xl border-4 border-iosCardSecondary bg-iosBg flex flex-col items-center justify-center transition';
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. LOGGING & LOCALSTORAGE REPOSITORY
+    // -------------------------------------------------------------------------
+    function saveWorkoutLog(e) {
+      e.preventDefault();
+      const title = document.getElementById('logTitle').value;
+      const type = document.getElementById('logModality').value;
+      const duration = Number(document.getElementById('logMinutes').value);
+      const rpe = Number(document.getElementById('logRPE').value);
+      const notes = document.getElementById('logNotes').value;
+
+      const newLog = {
+        id: 'log-' + Date.now(),
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        title,
+        type,
+        duration,
+        rpe,
+        notes
+      };
+
+      workoutLogs.unshift(newLog);
+      localStorage.setItem('apex_ios_logs', JSON.stringify(workoutLogs));
+      document.getElementById('logForm').reset();
+      document.getElementById('rpeIndicator').textContent = '7 / 10';
+      renderLogsHistory();
+    }
+
+    function renderLogsHistory() {
+      const container = document.getElementById('logsHistoryList');
+      document.getElementById('logCounter').textContent = workoutLogs.length;
+
+      if (workoutLogs.length === 0) {
+        container.innerHTML = `
+          <div class="bg-iosCard border border-iosSeparator/40 rounded-2xl p-6 text-center text-iosLabelSecondary text-xs">
+            No workouts logged yet. Complete today's session and save notes above.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = workoutLogs.map(log => {
+        const badgeColor = log.type === 'court' 
+          ? 'bg-iosOrange/15 text-iosOrange border-iosOrange/30' 
+          : log.type === 'gym' 
+          ? 'bg-iosBlue/15 text-iosBlue border-iosBlue/30' 
+          : 'bg-iosTennisGreen/15 text-iosTennisGreen border-iosTennisGreen/30';
+
+        return `
+          <div class="bg-iosCard border border-iosSeparator/60 rounded-2xl p-3.5 space-y-1.5 shadow-sm">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center gap-2">
+                <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${badgeColor}">${log.type}</span>
+                <h4 class="text-xs font-bold text-white">${log.title}</h4>
+              </div>
+              <span class="text-[10px] text-iosLabelSecondary font-mono">${log.date}</span>
+            </div>
+            <div class="flex items-center gap-3 text-[11px] text-iosLabelSecondary font-mono">
+              <span>⏱️ ${log.duration}m</span>
+              <span>⚡ RPE ${log.rpe}/10</span>
+            </div>
+            ${log.notes ? `<p class="text-[11px] text-slate-300 bg-iosBg p-2 rounded-xl border border-iosSeparator/40 leading-snug">${log.notes}</p>` : ''}
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function clearHistoryLogs() {
+      workoutLogs = [];
+      localStorage.removeItem('apex_ios_logs');
+      renderLogsHistory();
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. EXPORT & DOWNLOAD APP LOGIC
+    // -------------------------------------------------------------------------
+    function downloadSelfApp() {
+      try {
+        const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+        const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'ApexTennis-iPhone-App.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error('Download error', err);
+      }
+    }
+
+    function exportLogsJSON() {
+      const data = {
+        completedDaysMap,
+        completedExercises,
+        workoutLogs,
+        exportedAt: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ApexTennis-Records.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    // -------------------------------------------------------------------------
+    // 10. APP BOOTSTRAP
+    // -------------------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      // Sync with today's real day of the week
+      const dayNames = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+      const realDay = dayNames[new Date().getDay()];
+      currentDayId = realDay;
+
+      // Seed initial dummy log if fresh storage
+      if (workoutLogs.length === 0) {
+        workoutLogs = [
+          {
+            id: 'init-1',
+            date: 'Yesterday',
+            title: 'On-Court Baseline Rhythm + Trap Bar Deadlifts',
+            type: 'court',
+            duration: 75,
+            rpe: 8,
+            notes: 'High ball backhands had good clearance. Split step timing was on point throughout.'
+          }
+        ];
+        localStorage.setItem('apex_ios_logs', JSON.stringify(workoutLogs));
+      }
+
+      renderDaySegmentControl();
+      renderActiveDayCard();
+      updateRings();
+      renderDrillLibrary();
+      renderLogsHistory();
+      lucide.createIcons();
+    });
+  </script>
+
+</body></html>
